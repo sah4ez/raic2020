@@ -10,8 +10,8 @@ type AutoAttack struct {
 	ValidTargets  []EntityType
 }
 
-func NewAutoAttack(pathfindRange int32, validTargets []EntityType) *AutoAttack {
-	return &AutoAttack{
+func NewAutoAttack(pathfindRange int32, validTargets []EntityType) AutoAttack {
+	return AutoAttack{
 		PathfindRange: pathfindRange,
 		ValidTargets:  validTargets,
 	}

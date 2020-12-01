@@ -11,8 +11,8 @@ type MoveAction struct {
 	BreakThrough        bool
 }
 
-func NewMoveAction(target Vec2Int32, findClosestPosition bool, breakThrough bool) *MoveAction {
-	return &MoveAction{
+func NewMoveAction(target Vec2Int32, findClosestPosition bool, breakThrough bool) MoveAction {
+	return MoveAction{
 		Target:              target,
 		FindClosestPosition: findClosestPosition,
 		BreakThrough:        breakThrough,

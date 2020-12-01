@@ -10,8 +10,8 @@ type AttackAction struct {
 	AutoAttack *AutoAttack
 }
 
-func NewAttackAction(target *int32, autoAttack *AutoAttack) *AttackAction {
-	return &AttackAction{
+func NewAttackAction(target *int32, autoAttack *AutoAttack) AttackAction {
+	return AttackAction{
 		Target:     target,
 		AutoAttack: autoAttack,
 	}

@@ -10,8 +10,8 @@ type BuildAction struct {
 	Position   Vec2Int32
 }
 
-func NewBuildAction(entityType EntityType, position Vec2Int32) *BuildAction {
-	return &BuildAction{
+func NewBuildAction(entityType EntityType, position Vec2Int32) BuildAction {
+	return BuildAction{
 		EntityType: entityType,
 		Position:   position,
 	}
