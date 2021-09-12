@@ -4,10 +4,6 @@
     "Create": "Round1"
   },
   "players": [
-    "QuickStart",
-    {
-      "Empty": null
-    },
     {
       "Tcp": {
         "host": null,
@@ -16,6 +12,9 @@
         "timeout": null,
         "token": null
       }
+    },
+    {
+      "Empty": null
     }
   ]
 }

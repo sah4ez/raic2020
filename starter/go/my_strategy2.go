@@ -245,21 +245,75 @@ func (s *MyStrategy) FindSpaceForMeleeBase() Vec2Int32 {
 }
 
 func (s *MyStrategy) FindSpaceForRangedBase() Vec2Int32 {
-	if s.IsFree(Vec2Int32{18, 11}, EntityTypeRangedBase) {
-		return Vec2Int32{18, 11}
+	if len(s.builderBase) < 0 {
+
+		return Vec2Int32{21, 4}
 	}
-	if s.IsFree(Vec2Int32{11, 18}, EntityTypeRangedBase) {
-		return Vec2Int32{11, 18}
-	} else {
-		return Vec2Int32{18, 18}
+	// if len(s.rangedBase) == 1 {
+	//
+	// return Vec2Int32{10, 5}
+	// } else if len(s.rangedBase) == 0 {
+	// return Vec2Int32{10, 5}
+	// } else {
+	// if len(s.meleeBase) > 1 {
+	//
+	// return Vec2Int32{11, 21}
+	// } else {
+	// return Vec2Int32{5, 10}
+	// }
+	// }
+	size := s.settings[EntityTypeBuilderBase].Size
+	p := s.builderBase[0].Position
+	return Vec2Int32{p.X + size + 1, p.Y + size + 1}
+}
+
+func (s *MyStrategy) roundFunc(t EntityType) (v Vec2Int32) {
+	v = Vec2Int32{1, 1}
+	// fmt.Println("<<<<", v)
+	for v.X <= int32(s.size-2) {
+		// fmt.Println(">>>>", v)
+		switch {
+		case v.X == 1 || v.Y == 1:
+			if s.IsFree(v, t) {
+				return v
+			} else {
+				v.Y++
+			}
+		case v.X == 1 || v.Y != 1:
+			for v.Y > 1 {
+				if s.IsFree(v, t) {
+					return v
+				} else {
+					v.Y--
+					v.X++
+				}
+			}
+		case v.X != 1 || v.Y == 1:
+			v.X++
+			if s.IsFree(v, t) {
+				return v
+			} else {
+				for v.X > 1 {
+					if s.IsFree(v, t) {
+						return v
+					} else {
+						v.X--
+						v.Y++
+					}
+				}
+			}
+			v.Y++
+			if s.IsFree(v, t) {
+				return v
+			}
+		}
 	}
-	// size := s.settings[EntityTypeBuilderBase].Size
-	// p := s.builderBase[0].Position
-	// return Vec2Int32{p.X + size + 8, p.Y + size + 8}
+	fmt.Println("!>>>", v)
+	return v
 }
 
 func (s *MyStrategy) FindSpaceForHouse() Vec2Int32 {
-	// l := int32(len(s.house))
+	l := int32(len(s.house))
 	v1 := s.roundFunc(EntityTypeHouse)
 	// v1 := s.houseVec[0]
 	// поиск свободного места, не работает )))
@@ -275,15 +329,15 @@ func (s *MyStrategy) FindSpaceForHouse() Vec2Int32 {
 	// x, y := next()
 	// v = Vec2Int32{X: x, Y: y}
 	// }
-	return v1
+	// return v
 	// }
 
-	// size := s.settings[EntityTypeHouse].Size
-	// shift := int32(int(l/2) + 1)
-	// if l%2 != 0 {
-	// return Vec2Int32{v1.X, v1.Y + shift*size + 1}
-	// }
-	// return Vec2Int32{v1.X + shift*size + 1, v1.Y}
+	size := s.settings[EntityTypeHouse].Size
+	shift := int32(int(l/2) + 1)
+	if l%2 != 0 {
+		return Vec2Int32{v1.X, v1.Y + shift*size + 1}
+	}
+	return Vec2Int32{v1.X + shift*size + 1, v1.Y}
 }
 
 func (s *MyStrategy) BuildTurret(c int32, units []Entity, a Action) bool {
@@ -434,20 +488,23 @@ func (s *MyStrategy) BuildHouse(c int32, units []Entity, a Action) {
 		}
 	}
 
-	for i, e := range units {
+	// for i, e := range units {
+	for _, e := range units {
 
 		var p Vec2Int32
 		p = s.FindSpaceForHouse()
 		v := p
 
-		if len(s.house)%2 != 0 {
-			v.X = v.X - int32(1)
-			v.Y = v.Y + int32(i)
-
-		} else {
-			v.X = v.X + int32(i)
-			v.Y = v.Y - int32(1)
-		}
+		v.X = v.X - int32(1)
+		v.Y = v.Y - int32(1)
+		// if len(s.house)%2 != 0 {
+		// v.X = v.X - int32(1)
+		// v.Y = v.Y + int32(i)
+		//
+		// } else {
+		// v.X = v.X + int32(i)
+		// v.Y = v.Y - int32(1)
+		// }
 		ma := NewMoveAction(
 			v, true, true,
 		)
@@ -548,7 +605,7 @@ func (s *MyStrategy) StopMakeBuilder(a Action) {
 }
 
 func (s *MyStrategy) IsFree(pos Vec2Int32, t EntityType) bool {
-	size := s.settings[t].Size + 1
+	size := s.settings[t].Size
 	free := true
 	if (pos.X < 0 || pos.X > int32(len(s.e)-1)) || (pos.Y < 0 || pos.Y > int32(len(s.e)-1)) {
 		return false
@@ -564,25 +621,6 @@ func (s *MyStrategy) IsFree(pos Vec2Int32, t EntityType) bool {
 
 	s.e[pos.X][pos.Y] = Entity{Id: int32(-1)}
 	return free
-}
-
-func (s *MyStrategy) roundFunc(t EntityType) (v Vec2Int32) {
-	v = Vec2Int32{1, 1}
-	for i := 1; i < s.size-2; i++ {
-		for j := 1; j < i; j++ {
-			v.X = int32(j)
-			v.Y = int32(i - j)
-			if s.IsFree(v, t) {
-				fmt.Println(">>>>", v)
-				return v
-				// break
-			} else {
-				continue
-			}
-		}
-	}
-	fmt.Println("!>>>", v)
-	return v
 }
 
 func (s *MyStrategy) getAction(playerView PlayerView, debugInterface *DebugInterface) Action {
@@ -620,36 +658,15 @@ func (s *MyStrategy) getAction(playerView PlayerView, debugInterface *DebugInter
 	}
 
 	for _, e := range playerView.Entities {
-		// if e.Id == playerView.MyId {
-		// if e.EntityType == EntityTypeBuilderBase || e.EntityType == EntityTypeMeleeBase || e.EntityType == EntityTypeRangedBase {
-		// size := s.settings[e.EntityType].Size
-		// for i := e.Position.X; i <= e.Position.X+size+1; i++ {
-		// for j := e.Position.Y; j <= e.Position.Y+size+1; j++ {
-		// s.e[i][j] = e
-		// }
-		// }
-		// }
-		// if e.EntityType == EntityTypeHouse {
-		// s.e[e.Position.X][e.Position.Y] = e
-		// size := s.settings[e.EntityType].Size
-		// for i := e.Position.X - 1; i <= e.Position.X+size+1; i++ {
-		// for j := e.Position.Y - 1; j <= e.Position.Y+size+1; j++ {
-		// s.e[i][j] = e
-		// }
-		// }
-		// }
-		// } else {
-		size := s.settings[e.EntityType].Size
-		for i := e.Position.X; i <= e.Position.X+size-1; i++ {
-			for j := e.Position.Y; j <= e.Position.Y+size-1; j++ {
+		s.e[e.Position.X][e.Position.Y] = e
+		for i := e.Position.X; i <= e.Position.X+s.settings[e.EntityType].Size-1; i++ {
+			for j := e.Position.Y; j <= e.Position.Y+s.settings[e.EntityType].Size-1; j++ {
 				s.e[i][j] = e
 			}
 		}
-		// }
 		if e.PlayerId == nil {
 			continue
 		}
-		// fmt.Println(e)
 		if *e.PlayerId != playerView.MyId {
 			if e.EntityType == EntityTypeBuilderBase {
 				c, ok := s.enimies[*e.PlayerId]
@@ -706,30 +723,22 @@ func (s *MyStrategy) getAction(playerView PlayerView, debugInterface *DebugInter
 			s.Repair(playerView.CurrentTick, s.builder, a, h)
 		}
 	}
-	// if s.res >= int(s.settings[EntityTypeTurret].InitialCost) {
-	// units := []Entity{s.turelBuilder}
-	// ok := s.BuildTurret(playerView.CurrentTick, units, a)
-	// if !ok {
-	// s.Mining(units, a)
-	// }
-	// }
-	// if s.res >= int(s.settings[EntityTypeRangedBase].InitialCost) && len(s.meleeBase) < 2 && s.IsFree(Vec2Int32{18, 11}, EntityTypeRangedBase) {
-	if s.res >= int(s.settings[EntityTypeRangedBase].InitialCost) && len(s.house) > 6 && len(s.rangedBase) < 2 {
+	if s.res >= int(s.settings[EntityTypeTurret].Cost) || len(s.rangedBase) > 1 {
+		units := []Entity{s.turelBuilder}
+		ok := s.BuildTurret(playerView.CurrentTick, units, a)
+		if !ok {
+			s.Mining(units, a)
+		}
+	}
+	if s.res >= int(s.settings[EntityTypeRangedBase].Cost) && len(s.meleeBase) < 2 && s.IsFree(Vec2Int32{18, 18}, EntityTypeRangedBase) {
 		s.BuildRangedBase(playerView.CurrentTick, s.builder, a)
 	} else if s.Population() >= s.Capacity()-10 {
-		if s.res >= int(s.settings[EntityTypeHouse].InitialCost) {
+		if s.res >= int(s.settings[EntityTypeHouse].Cost) {
 			s.BuildHouse(playerView.CurrentTick, s.builder, a)
 		}
 	} else {
 		// s.Mining(s.builder, a)
 	}
-	// if s.res >= int(s.settings[EntityTypeRangedBase].InitialCost) && len(s.house) > 9 && len(s.rangedBase) == 2 {
-	// s.BuildRangedBase(playerView.CurrentTick, s.builder, a)
-	// } else if s.Population() >= s.Capacity()-10 {
-	// if s.res >= int(s.settings[EntityTypeHouse].InitialCost) {
-	// s.BuildHouse(playerView.CurrentTick, s.builder, a)
-	// }
-	// }
 	s.Mining(s.miner, a)
 
 	//if s.stopCallback == nil && int32(s.res) >= playerView.EntityProperties[EntityTypeMeleeUnit].Cost {

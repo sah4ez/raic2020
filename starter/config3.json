@@ -1,12 +1,17 @@
 {
   "seed": null,
   "game": {
-    "Create": "Round1"
+    "Create": "Round2"
   },
   "players": [
-    "QuickStart",
     {
-      "Empty": null
+      "Tcp": {
+        "host": null,
+        "port": 31000,
+        "accept_timeout": null,
+        "timeout": null,
+        "token": null
+      }
     },
     {
       "Tcp": {

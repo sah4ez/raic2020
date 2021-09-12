@@ -6,9 +6,6 @@
   "players": [
     "QuickStart",
     {
-      "Empty": null
-    },
-    {
       "Tcp": {
         "host": null,
         "port": 31001,
@@ -16,6 +13,8 @@
         "timeout": null,
         "token": null
       }
-    }
+    },
+    "QuickStart",
+    "QuickStart"
   ]
 }
